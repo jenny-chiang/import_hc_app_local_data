@@ -1,6 +1,6 @@
-const fs = require('fs');
-const readline = require('readline');
-const { MongoClient } = require('mongodb');
+import { MongoClient } from 'mongodb';
+import fs, { constants } from 'fs';
+import inquirer from 'inquirer';
 
 /** mongodb config */
 const config = {
@@ -32,7 +32,8 @@ const dbNames = [
 	'ServiceRecord',
 	'shift',
 	'shiftRecord',
-	'TOCCFormRecord'
+	'TOCCFormRecord',
+	'ErrorLog',
 ];
 
 const configEnv = 'local';
@@ -62,63 +63,85 @@ async function renameFile() {
 
 async function importData({ db }) {
 	for await(const name of dbNames) {
-		/** collection  */
-		const collection = db.collection(name);
-		/** file data */
-		let data = require(`./data/${name}.json`);
-		console.log('====== data.length:', data.length);
+    const collection = db.collection(name);
+    const relativePath = `./data/${name}.json`;
 
-		if (data.length > 0) {
-			// add data
-			console.log(`====== insert ${name} data start ======`);
-			await collection.insertMany(data);
-			console.log(`====== insert ${name} data end ======`);
-		}
-	}
+    try {
+			// 檢查檔案是否存在
+      await fs.accessSync(relativePath, fs.constants.R_OK);
+      // 取得資料
+			const fileContent = await fs.readFileSync(relativePath);
+      const saveData = JSON.parse(fileContent);
+			console.log(`${name} data`, saveData.length);
+			// 如果有資料就寫入
+      if (saveData.length > 0) {
+        console.log(`====== insert ${name} data start ======`);
+        await collection.insertMany(saveData); // Insert data
+        console.log(`====== insert ${name} data end ======`);
+      }
+    } catch (err) {
+      console.log(`Error with file ${name}:`, err);
+    }
+  }
 }
 
 async function removeData({ db }) {
 	for await(const name of dbNames) {
-		/** collection  */
 		const collection = db.collection(name);
-		let data = require(`./data/${name}.json`);
-		if (data.length > 0) {
-			// remove data
-			console.log(`====== remove ${name} data start ======`);
-			await collection.deleteMany();
-			console.log(`====== remove ${name} data end ======`);
+		const relativePath = `./data/${name}.json`;
+		try {
+			// 檢查檔案是否存在
+			await fs.accessSync(relativePath, constants.R_OK);
+			// 取得資料
+			const fileContent = await fs.readFileSync(relativePath); // Read file asynchronously
+			const saveData = JSON.parse(fileContent);
+			console.log(`${name} data`, saveData.length);
+			// 如果有資料就刪除
+			if (saveData.length > 0) {
+        // remove data
+					console.log(`====== remove ${name} data start ======`);
+					await collection.deleteMany();
+					console.log(`====== remove ${name} data end ======`);
+      }
+		} catch (error) {
+			console.log('error', error);
 		}
 	}
 }
 
-async function main(command) {
+async function main() {
 	const { client, db } = await connectDB();
 	dbClient = client;
 
-	const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-
-	await rl.question('請輸入指令（insert/remove）：', async (command) => {
-		console.log(`====== start ${command} ======`);
-
-		switch(command) {
-			case 'insert':
-				await renameFile();
-				await importData({ db });
-				break;
-			case 'remove':
-				await removeData({ db });
-				break;
-			default:
-				break;
+	// 設定選擇指令
+	const answers = await inquirer.prompt([
+		{
+			type: 'list',
+			name: 'command',
+			message: '請選擇指令：',
+			choices: ['insert', 'remove']
 		}
+	]);
+	const selectedCommand = answers.command;
+	console.log(`====== start ${selectedCommand} ======`);
 
-		rl.close();
-		await client.close();
-		console.log('====== db connect close ======');
-	});
+	// 根據選擇的指令執行對應的動作
+	switch(selectedCommand) {
+		// 新增資料
+		case 'insert':
+			await renameFile();
+			await importData({ db });
+			break;
+		// 刪除資料
+		case 'remove':
+			await removeData({ db });
+			break;
+		default:
+			break;
+	}
+
+	await client.close();
+	console.log('====== db connect close ======');
 }
 
 main()
