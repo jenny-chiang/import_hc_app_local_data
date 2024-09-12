@@ -2,6 +2,8 @@ import { MongoClient } from 'mongodb';
 import fs, { constants } from 'fs';
 import inquirer from 'inquirer';
 
+import dbNames from './dbNames.js';
+
 /** mongodb config */
 const config = {
 	local: {
@@ -17,24 +19,6 @@ const config = {
 		dbName: 'HC_App_local_data',
 	}
 };
-
-/** App db name list */
-const dbNames = [
-	'CaseData',
-	'CasePlan',
-	'EmployeeFootprint',
-	'EmployeeVitalSign',
-	'MessageData',
-	'OfflineEmployeeData',
-	'OfflineRecord',
-	'OfflineTOCCForm',
-	'ServiceItemData',
-	'ServiceRecord',
-	'shift',
-	'shiftRecord',
-	'TOCCFormRecord',
-	'ErrorLog',
-];
 
 const configEnv = 'local';
 const { dbOptions, dbUri, dbName } = config[configEnv];

@@ -1,0 +1,16 @@
+export default [
+  'CaseData',
+	'CasePlan',
+	'EmployeeFootprint',
+	'EmployeeVitalSign',
+	'MessageData',
+	'OfflineEmployeeData',
+	'OfflineRecord',
+	'OfflineTOCCForm',
+	'ServiceItemData',
+	'ServiceRecord',
+	'shift',
+	'shiftRecord',
+	'TOCCFormRecord',
+	'ErrorLog',
+]
