@@ -1,0 +1,18 @@
+# 以main為base開出去的分支名稱以 fix/ 開頭且後面只含英文、-、_時，使用 fix label
+bug:
+  - head-branch: ['^fix/[a-zA-Z_-]+']
+
+# 如果更動的檔案有.md檔，使用 documentation 標籤
+documentation:
+  - changed-files:
+    - any-glob-to-any-file: ['*.md']
+
+# 以main為base開出去的分支名稱以 feat/ 開頭且後面只含英文、-、_時，使用 feat label
+feature:
+  - head-branch: ['^feat/[a-zA-Z_-]+']
+
+chore:
+  - head-branch: ['^chore/[a-zA-Z_-]+']
+
+refactor:
+  - head-branch: ['^refactor/[a-zA-Z_-]+']
