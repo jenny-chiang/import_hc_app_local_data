@@ -1,0 +1,18 @@
+name: 'Generate Labels'
+
+on:
+- pull_request
+- issues
+
+jobs:
+  labeler:
+    permissions:
+      contents: read
+      # 一定要賦予workflow PR的wirte權限才能上label
+      # 如果你的repo是從別的repo form產生的，則預設只會有PR的read權限，此時就須要把on底下的事件改用pull_request_target
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/labeler@v5
+      env:
+        GITHUB_TOKEN: "${{ secrets.TOKEN }}"
