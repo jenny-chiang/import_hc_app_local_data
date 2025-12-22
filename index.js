@@ -8,8 +8,6 @@ import dbNames from './dbNames.js';
 const config = {
 	local: {
 		dbOptions: {
-			// useNewUrlParser: true,
-			// useUnifiedTopology: true,
 			auth: {
 				username: '',
 				password: '',
@@ -47,7 +45,6 @@ async function renameFile() {
 
 async function importData({ db }) {
 	for await(const name of dbNames) {
-    const collection = db.collection(name);
     const relativePath = `./data/${name}.json`;
 
     try {
@@ -59,6 +56,14 @@ async function importData({ db }) {
 			console.log(`${name} data`, saveData.length);
 			// 如果有資料就寫入
       if (saveData.length > 0) {
+        // 檢查 collection 是否存在
+        const collections = await db.listCollections({ name }).toArray();
+        if (collections.length === 0) {
+          console.log(`====== create collection ${name} ======`);
+          await db.createCollection(name);
+        }
+
+        const collection = db.collection(name);
         console.log(`====== insert ${name} data start ======`);
         await collection.insertMany(saveData); // Insert data
         console.log(`====== insert ${name} data end ======`);
