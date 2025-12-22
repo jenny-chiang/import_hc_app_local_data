@@ -12,5 +12,6 @@ export default [
 	'shift',
 	'shiftRecord',
 	'TOCCFormRecord',
+	'OfflineServiceRecord',
 	'ErrorLog',
 ]
