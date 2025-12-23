@@ -3,22 +3,21 @@ changelog:
     authors:
       - 'dependabot'
   categories:
-    - title: 'New'
+    - title: '✨ New Features'
       labels:
-        - 'type: feature'
-    - title: 'Improved'
+        - 'feature'
+    - title: '🐛 Bug Fixes'
       labels:
-        - 'type: docs'
-        - 'type: style'
-    - title: 'Refactor'
+        - 'bug'
+    - title: '♻️ Refactor'
       labels:
-        - 'type: refactor'
-    - title: 'Fixed'
+        - 'refactor'
+    - title: '📚 Documentation'
       labels:
-        - 'type: bug(fix)'
-    - title: 'Documentation'
+        - 'documentation'
+    - title: '🔧 Chore'
       labels:
-        - 'type: docs'
+        - 'chore'
     - title: 'Other Changes'
       labels:
         - '*'
