@@ -20,6 +20,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.TOKEN }}
 
       - name: Extract version from PR title
         id: extract_version
@@ -37,6 +38,8 @@ jobs:
           echo "✅ 提取到版本號: $VERSION"
 
       - name: Create and push tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
         run: |
           VERSION="${{ steps.extract_version.outputs.version }}"
 
