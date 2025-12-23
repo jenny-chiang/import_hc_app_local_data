@@ -1,0 +1,57 @@
+name: 'Auto Tag on Version PR Merge'
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  auto-tag:
+    # 只在 PR 被 merge 且標題符合格式時執行
+    if: |
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.title, 'chore: update version to ')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 需要 write 權限才能推送 tag
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from PR title
+        id: extract_version
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          # 從 "chore: update version to x.x.x" 中提取版本號
+          VERSION=$(echo "$PR_TITLE" | sed -n 's/^chore: update version to \(.*\)$/\1/p')
+
+          if [ -z "$VERSION" ]; then
+            echo "❌ 無法從 PR 標題中提取版本號"
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "✅ 提取到版本號: $VERSION"
+
+      - name: Create and push tag
+        run: |
+          VERSION="${{ steps.extract_version.outputs.version }}"
+
+          # 設定 git 用戶
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 檢查 tag 是否已存在
+          if git rev-parse "$VERSION" >/dev/null 2>&1; then
+            echo "⚠️  Tag $VERSION 已存在，跳過創建"
+            exit 0
+          fi
+
+          # 創建並推送 tag
+          git tag -a "$VERSION" -m "Release version $VERSION"
+          git push origin "$VERSION"
+
+          echo "✅ 成功創建並推送 tag: $VERSION"
